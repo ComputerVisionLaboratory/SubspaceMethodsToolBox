@@ -1,0 +1,32 @@
+%% Load Data
+clear;
+clc;
+load('TsukubaHandDigitsDataset24x24.mat')
+testDataUsage = TestDataUsage.WholeData;
+switch testDataUsage
+    case TestDataUsage.SingleClass
+        % Code for testing on a single entry
+        
+    case TestDataUsage.WholeData
+        % Code for testing on a subset of data
+    case TestDataUsage.Subsets
+        % Code for testing on the whole dataset
+end
+% specific_class = 0;
+% specific_class_index = specific_class + 1;
+% testing_data = testData(:, :, specific_class_index);
+% test_labels = specific_class_index;
+
+training_data = trainData;
+testData = subsetTestData(testData, 4);
+testing_data = testData;
+testLabels = generateLabels(testing_data);
+numDimReferenceSubspace = 10;
+numDimInputSubspace = 4;
+
+model = MSM(trainData,...
+    numDimReferenceSubspace, numDimInputSubspace, testLabels);
+mode = model.train();
+modelEvaluation = model.evaluate(testData);
+
+

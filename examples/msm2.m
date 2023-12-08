@@ -1,8 +1,8 @@
-%% Load data
-testDataUsage = TestDataUsage.WholeData;
-[trainData, testData, testLabels] = prepareData(testDataUsage);
+% testDataUsage = TestDataUsage.WholeData;
+testDataUsage = TestDataUsage.Subsets;
+numSets = 2;
+[trainData, testData, testLabels] = prepareData(testDataUsage, numSets);
 
-%% Train model
 numDimReferenceSubspace = 10;
 numDimInputSubspace = 4;
 
@@ -11,7 +11,6 @@ model = MSM(trainData,...
     numDimInputSubspace,...
     testLabels);
 
-%% Evaluate model
 modelEvaluation = model.evaluate(testData);
 modelEvaluation.printResults();
 
