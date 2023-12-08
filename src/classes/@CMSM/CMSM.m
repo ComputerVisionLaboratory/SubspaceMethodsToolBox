@@ -1,7 +1,6 @@
 classdef CMSM
     properties
         name = 'Constrained Mutual Subspace Method';
-        trainData;
         generalizedDifferenceSubspace; % GDS
         referenceSubspaces;
         numDimInputSubspace;
@@ -13,11 +12,11 @@ classdef CMSM
         function obj = CMSM(trainData, numDimReferenceSubspace, numDimInputSubspace, indexOfEigsToKeep, labels)
             numDim = size(trainData, 1);
             numClasses = size(trainData, 3);
-            obj.trainData = trainData;
+            trainData = cvlNormalize(trainData);
             obj.numDimReferenceSubspace = numDimReferenceSubspace;
             obj.numDimInputSubspace = numDimInputSubspace;
             obj.trueTestLabels = labels;
-            subspaces = cvlBasisVector(obj.trainData,...
+            subspaces = cvlBasisVector(trainData,...
                 obj.numDimReferenceSubspace);
             P = zeros(numDim, numDim);
             for I=1:numClasses
@@ -61,6 +60,7 @@ classdef CMSM
         function scores = getSimilarityScores(obj, testData)
             testDatasize = size(testData);
             testDatasizeNumElements = numel(testDatasize);
+            testData = cvlNormalize(testData);
             
             if testDatasizeNumElements == 4
                 numSets = testDatasize(3);

@@ -1,50 +1,57 @@
-classdef MSM
+classdef KMSM
     properties
-        name = 'Mutual Subspace Method';
+        name = 'Kernel Mutual Subspace Method';
+        trainData;
         referenceSubspaces;
         numDimInputSubspace;
         numDimReferenceSubspace;
+        sigma;
         trueTestLabels;
     end
-    
+
     methods
-        function obj = MSM(trainData, numDimReferenceSubspace, numDimInputSubspace, labels)
-            trainData = cvlNormalize(trainData);
+        function obj = KMSM(trainData, numDimReferenceSubspace, numDimInputSubspace, sigma, labels)
+            obj.trainData = cvlNormalize(trainData);
+            obj.sigma = sigma;
             obj.numDimReferenceSubspace = numDimReferenceSubspace;
             obj.numDimInputSubspace = numDimInputSubspace;
             obj.trueTestLabels = labels;
-            subspaces = cvlBasisVector(trainData,...
-                obj.numDimReferenceSubspace);
-            obj.referenceSubspaces = subspaces;
+            obj.referenceSubspaces = cvlKernelBasisVector(obj.trainData,...
+                                         obj.numDimReferenceSubspace,...
+                                         obj.sigma);
         end
-        
-        
+
+
         % Returns the predicted labels for the test data
         function prediction = predict(obj, testData)
             similarityScores = obj.getSimilarityScores(testData);
             eval = ModelEvaluation(similarityScores, obj.trueTestLabels, obj.name);
             prediction = eval.predicted_labels;
         end
-        
+
         % Returns the similarity scores for the test data (same as probabilities)
         function probabilities = predictProb(obj, testData)
             probabilities = obj.getSimilarityScores(testData);
         end
-        
+
         % Returns the evaluation object for the test data
         function eval = evaluate(obj, testData)
             similarityScores = obj.getSimilarityScores(testData);
             eval = ModelEvaluation(similarityScores, obj.trueTestLabels, obj.name);
         end
     end
-    
+
     methods (Access = private)
         function scores = getSimilarityScores(obj, testData)
             testData = cvlNormalize(testData);
-            inputSubspace = cvlBasisVector(testData,...
-                obj.numDimInputSubspace);
-            similarities = cvlCanonicalAngles(obj.referenceSubspaces,...
-                inputSubspace);
+            inputSubspace = cvlKernelBasisVector(testData,...
+                                               obj.numDimInputSubspace,...
+                                               obj.sigma);
+            similarities = cvlKernelCanonicalAngles(obj.trainData,...
+            obj.referenceSubspaces,...
+            testData,...
+             inputSubspace,...
+             obj.sigma);
             scores = similarities(:, :, end, end);
         end
     end
